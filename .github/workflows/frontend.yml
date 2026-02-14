@@ -1,0 +1,31 @@
+name: Frontend CI + Automation Tests
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout frontend repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Trigger Playwright Tests Repo
+        run: |
+          curl -X POST https://api.github.com/repos/YOUR_USERNAME/nifty-ai-playwright-tests/dispatches \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
+          -d '{"event_type":"frontend-updated"}'
